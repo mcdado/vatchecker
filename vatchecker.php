@@ -109,7 +109,7 @@ class Vatchecker extends Module
 		$this->description = $this->l('The module verifies whether a customer possesses a valid VAT EU number through the VIES VAT online service. Upon validation, it automatically applies a 0% tax rate to customers from the EU who are not from the same country as the shop.');
 
 
-		$this->ps_versions_compliancy = [ 'min' => '1.7', 'max' => _PS_VERSION_ ];
+		$this->ps_versions_compliancy = [ 'min' => '1.6', 'max' => _PS_VERSION_ ];
 	}
 
 	/**
@@ -127,7 +127,6 @@ class Vatchecker extends Module
 		return parent::install()
 		       && $this->installDB()
 		       && $this->registerHook( 'displayHeader' )
-		       && $this->registerHook( 'displayBeforeBodyClosingTag' )
 		       && $this->registerHook( 'actionValidateCustomerAddressForm' );
 	}
 
@@ -167,27 +166,18 @@ class Vatchecker extends Module
 	/**
 	 * @since 1.1.0
 	 *
-	 * @param  array  $params
+	 * @param array $params
 	 */
 	public function hookDisplayHeader( $params )
 	{
+		Media::addJsDef(array(
+			'vatchecker' =>  array(
+				'ajax_url' => $this->getPathUri() . 'ajax.php',
+				'token' => Tools::getToken('vatchecker'),
+			)
+		));
 		$this->context->controller->addJS( $this->_path . 'views/js/front.js' );
 		$this->context->controller->addCSS( $this->_path . 'views/css/front.css' );
-	}
-
-	/**
-	 * @since 1.1.0
-	 *
-	 * @param  array  $params
-	 */
-	public function hookDisplayBeforeBodyClosingTag( $params )
-	{
-		$json = [
-			'ajax_url' => $this->getPathUri() . 'ajax.php',
-			'token'    => Tools::getToken( 'vatchecker' ),
-		];
-
-		echo '<script id="vatchecker_js">var vatchecker = ' . json_encode( $json ) . '</script>';
 	}
 
 	/**
