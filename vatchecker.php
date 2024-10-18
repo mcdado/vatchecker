@@ -105,9 +105,9 @@ class Vatchecker extends Module
 
 		parent::__construct();
 
-		$this->displayName = $this->l( 'VAT Checker' );
-		$this->description = $this->l( 'The module verifies whether a customer possesses a valid VAT EU number through the VIES VAT online service. Upon validation, it automatically applies a 0% tax rate to customers from the EU who are not from the same country as the shop.' );
-		
+		$this->displayName = $this->l('VAT Checker');
+		$this->description = $this->l('The module verifies whether a customer possesses a valid VAT EU number through the VIES VAT online service. Upon validation, it automatically applies a 0% tax rate to customers from the EU who are not from the same country as the shop.');
+
 
 		$this->ps_versions_compliancy = [ 'min' => '1.7', 'max' => _PS_VERSION_ ];
 	}
@@ -304,7 +304,7 @@ class Vatchecker extends Module
 		$select_country = [
 			0 => [
 				'id'   => 0,
-				'name' => $this->l( '- Select a country -' ),
+				'name' => $this->l('- Select a country -'),
 			],
 		];
 
@@ -314,34 +314,34 @@ class Vatchecker extends Module
 		return [
 			'form' => [
 				'legend' => [
-					'title' => $this->l( 'Settings' ),
+					'title' => $this->l('Settings'),
 					'icon'  => 'icon-cogs',
 				],
 				'input'  => [
 					[
 						'type'    => 'switch',
-						'label'   => $this->l( 'Activate module' ),
+						'label'   => $this->l('Activate module'),
 						'name'    => 'VATCHECKER_LIVE_MODE',
 						'is_bool' => true,
 						'values'  => [
 							[
 								'id'    => 'active_on',
 								'value' => true,
-								'label' => $this->l( 'Enabled' ),
+								'label' => $this->l('Enabled'),
 							],
 							[
 								'id'    => 'active_off',
 								'value' => false,
-								'label' => $this->l( 'Disabled' ),
+								'label' => $this->l('Disabled'),
 							],
 						],
 					],
 					[
 						'type'    => 'radio',
-						'label'   => $this->l( 'Offline validation' ),
+						'label'   => $this->l('Offline validation'),
 						'name'    => 'VATCHECKER_ALLOW_OFFLINE',
 						'required' => false,
-						'desc'    => $this->l( 'What should be done when the VIES VAT service is offline?' ),
+						'desc'    => $this->l('What should be done when the VIES VAT service is offline?'),
 						'values' => [
 							[
 								'id' => 'invalid',
@@ -368,9 +368,9 @@ class Vatchecker extends Module
 					[
 						'col'     => 3,
 						'type'    => 'select',
-						'desc'    => $this->l( 'Select your store location' ),
+						'desc'    => $this->l('Select your store location'),
 						'name'    => 'VATCHECKER_ORIGIN_COUNTRY',
-						'label'   => $this->l( 'Origin country' ),
+						'label'   => $this->l('Origin country'),
 						'options' => [
 							'query' => array_merge( $select_country, $countries ),
 							'id'    => 'id',
@@ -380,9 +380,9 @@ class Vatchecker extends Module
 					[
 						'col'      => 3,
 						'type'     => 'checkbox',
-						'desc'     => $this->l( 'Select EU countries that can order with 0% VAT' ),
+						'desc'     => $this->l('Select EU countries that can order with 0% VAT'),
 						'name'     => 'VATCHECKER_EU_COUNTRIES',
-						'label'    => $this->l( 'Enabled EU countries' ),
+						'label'    => $this->l('Enabled EU countries'),
 						'multiple' => true,
 						'values'   => [
 							'query' => $countries,
@@ -393,8 +393,8 @@ class Vatchecker extends Module
 					],
 					[
 						'type'     => 'select',
-						'label'    => $this->l( 'Business customer group' ),
-						'desc'     => $this->l( 'If a customer has a validated VAT EU number, assign them to the selected group. (OPTIONAL)' ),
+						'label'    => $this->l('Business customer group'),
+						'desc'     => $this->l('If a customer has a validated VAT EU number, assign them to the selected group. (OPTIONAL)'),
 						'name'     => 'VATCHECKER_CUSTOMER_GROUP',
 						'required' => true,
 						'options'  => [
@@ -407,7 +407,7 @@ class Vatchecker extends Module
 
 				],
 				'submit' => [
-					'title' => $this->l( 'Save' ),
+					'title' => $this->l('Save'),
 				],
 			],
 		];
@@ -740,7 +740,7 @@ class Vatchecker extends Module
 		}
 
 		if ( ! $countryCode || ! $this->isEUCountry( $countryCode ) ) {
-			$return['error'] = $this->l( 'Please select an EU country' );
+			$return['error'] = $this->l('Please select an EU country');
 
 			self::$cache[ $cache_key ] = $return;
 
@@ -748,7 +748,7 @@ class Vatchecker extends Module
 		}
 
 		if ( ! $vatNumber ) {
-			$return['error'] = $this->l( 'Please provide a VAT number' );
+			$return['error'] = $this->l('Please provide a VAT number');
 
 			self::$cache[ $cache_key ] = $return;
 
@@ -758,7 +758,7 @@ class Vatchecker extends Module
 		$vatNumber = ltrim( $vatNumber, $countryCode );
 
 		if ( ! $this->isVatFormat( $vatNumber ) ) {
-			$return['error'] = $this->l( 'VAT number format invalid' );
+			$return['error'] = $this->l('VAT number format invalid');
 
 			self::$cache[ $cache_key ] = $return;
 
@@ -822,12 +822,12 @@ class Vatchecker extends Module
 			if ( $result->valid === true ) {
 				$return['valid'] = true;
 			} else {
-				$return['error'] = $this->l( 'This is not a valid VAT number' );
+				$return['error'] = $this->l('This is not a valid VAT number');
 			}
 		} catch ( Throwable $e ) {
 
-			//$return['error'] = $this->l( $e->getMessage() );
-			$return['error'] = $this->l( 'EU VIES server not responding' );
+			//$return['error'] = $this->l($e->getMessage());
+			$return['error'] = $this->l('EU VIES server not responding');
 			$return['valid'] = $this->VIESOfflineLogicHander($params);
 
 			PrestaShopLogger::addLog( 'VAT check failed! (params: ' . implode( ', ', $params ) . ' , error: ' . $e->getMessage() . ')', ERROR_SEVERITY );
