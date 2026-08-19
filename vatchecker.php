@@ -505,7 +505,7 @@ class Vatchecker extends Module
 		}
 
 		$checkVat  = null;
-		$cache_key = $address->id_country . $address->vat_number;
+		$cache_key = $address->id_country . '_' . $address->vat_number;
 		if ( isset( self::$cache[ $cache_key ] ) ) {
 			$checkVat = self::$cache[ $cache_key ];
 		}
@@ -527,10 +527,17 @@ class Vatchecker extends Module
 			 */
 			$result = $this->getVatValidation( $address );
 
+			// The admin cart list recalculates prices for many carts at once:
+			// use the DB data instead of calling VIES for each of them.
+			$checkIfTimedOut = true;
+			if ( isset( $this->context->controller ) && get_class( $this->context->controller ) === 'AdminCartsController' ) {
+				$checkIfTimedOut = false;
+			}
+
 			if ( $result ) {
 
 				// VIES API already ran successfully within 24 hours.
-				if ( strtotime( $result['date_modified'] ) > strtotime( '-1 day' ) ) {
+				if ( ! $checkIfTimedOut || strtotime( $result['date_modified'] ) > strtotime( '-1 day' ) ) {
 					$checkVat = [
 						'valid' => (bool) $result['valid'],
 						'error' => '',
@@ -598,9 +605,9 @@ class Vatchecker extends Module
 		$table = _DB_PREFIX_ . 'vatchecker';
 
 		$sql = "SELECT * FROM {$table}
-			WHERE id_address = {$address->id}
-				AND id_country = {$address->id_country}
-				AND vat_number = '{$address->vat_number}'
+			WHERE id_address = " . (int) $address->id . "
+				AND id_country = " . (int) $address->id_country . "
+				AND vat_number = '" . pSQL( $address->vat_number ) . "'
 			";
 
 		$result = Db::getInstance()->executeS( $sql );
@@ -668,10 +675,10 @@ class Vatchecker extends Module
 		$values = [];
 		foreach ( $record as $key => $value ) {
 			$keys[ $key ] = "`{$key}`";
-			if ( is_bool( $value ) ) {
+			if ( is_bool( $value ) || is_int( $value ) ) {
 				$values[ $key ] = (int) $value;
 			} else {
-				$values[ $key ] = "'{$value}'";
+				$values[ $key ] = "'" . pSQL( $value ) . "'";
 			}
 		}
 
@@ -709,7 +716,7 @@ class Vatchecker extends Module
 	 */
 	public function checkVat( $vatNumber, $countryCode )
 	{
-		$cache_key = $countryCode . $vatNumber;
+		$cache_key = $countryCode . '_' . $vatNumber;
 		if ( isset( self::$cache[ $cache_key ] ) ) {
 			return self::$cache[ $cache_key ];
 		}
@@ -730,11 +737,11 @@ class Vatchecker extends Module
 		}
 
 		if ( ! $countryCode || ! $this->isEUCountry( $countryCode ) ) {
-			$return['error'] = $this->l('Please select an EU country');
-
-			self::$cache[ $cache_key ] = $return;
-
-			return $return;
+			// Non-EU country: VAT check not applicable, don't show an error.
+			return [
+				'valid' => null,
+				'error' => '',
+			];
 		}
 
 		if ( ! $vatNumber ) {
@@ -777,7 +784,7 @@ class Vatchecker extends Module
 	{
 		// Uses own static cache.
 		static $cache = [];
-		$cache_key = $countryCode . $vatNumber;
+		$cache_key = $countryCode . '_' . $vatNumber;
 		if ( isset( $cache[ $cache_key ] ) ) {
 			return $cache[ $cache_key ];
 		}
@@ -859,8 +866,8 @@ class Vatchecker extends Module
 		$countryId = Country::getByIso( $params['countryCode'] );
 
 		$sql = "SELECT * FROM {$table}
-			WHERE id_country = {$countryId}
-				AND vat_number = '{$params['vatNumber']}'
+			WHERE id_country = " . (int) $countryId . "
+				AND vat_number = '" . pSQL( $params['vatNumber'] ) . "'
 			";
 
 		$result = Db::getInstance()->executeS( $sql );
@@ -932,11 +939,10 @@ class Vatchecker extends Module
 	{
 		$key = 'iso_code';
 		if ( is_numeric( $countryCode ) ) {
-			$countryCode = intval($countryCode);
 			$key = 'id_country';
 		}
 		foreach ( $this->getEUCountries() as $country ) {
-			if ( $country[ $key ] === $countryCode ) {
+			if ( (string) $country[ $key ] === (string) $countryCode ) {
 				return true;
 			}
 		}
