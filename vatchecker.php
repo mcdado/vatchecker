@@ -28,10 +28,10 @@ if ( ! defined( '_PS_VERSION_' ) ) {
 	exit;
 }
 
-const ERROR_SEVERITY = 3;
-
 class Vatchecker extends Module
 {
+	const ERROR_SEVERITY = 3;
+
 	/**
 	 * Cache for VIES API results.
 	 *
@@ -820,7 +820,7 @@ class Vatchecker extends Module
 			$return['error'] = $this->l('EU VIES server not responding');
 			$return['valid'] = $this->VIESOfflineLogicHander($params);
 
-			PrestaShopLogger::addLog( 'VAT check failed! (params: ' . implode( ', ', $params ) . ' , error: ' . $e->getMessage() . ')', ERROR_SEVERITY );
+			PrestaShopLogger::addLog( 'VAT check failed! (params: ' . implode( ', ', $params ) . ' , error: ' . $e->getMessage() . ')', self::ERROR_SEVERITY );
 		}
 
 		$cache[ $cache_key ] = $return;
