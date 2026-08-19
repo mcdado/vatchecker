@@ -836,10 +836,10 @@ class Vatchecker extends Module
 				return true;
 			case 2:
 				$previous =  $this->getPreviousValidation($params);
-				return (!empty($previous)) ? $previous->valid : false;
+				return (!empty($previous)) ? (bool) $previous['valid'] : false;
 			case 3:
 				$previous =  $this->getPreviousValidation($params);
-				return (!empty($previous)) ? $previous->valid : true;
+				return (!empty($previous)) ? (bool) $previous['valid'] : true;
 		}
 		return false;
 	}
